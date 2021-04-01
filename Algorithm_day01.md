@@ -149,3 +149,12 @@ Code:
     }
 	```
 - 这题跟编译原理有关，状态机明天看看会不会。
+### 剑指 Offer 20. 表示数值的字符串 ###
+Solution：[https://leetcode-cn.com/problems/biao-shi-shu-zhi-de-zi-fu-chuan-lcof/solution/que-ding-you-xian-zi-dong-ji-dfa-by-justyou/](https://leetcode-cn.com/problems/biao-shi-shu-zhi-de-zi-fu-chuan-lcof/solution/que-ding-you-xian-zi-dong-ji-dfa-by-justyou/)
+有限自动机：模拟正确的结果，然后填表，最后根据没有通过的案例修改表项即可。
+MainCode:
+	```
+	int transTable[10][6] = {{0,1,2,-1,8,-1},{-1,-1,2,-1,8,-1},{9,-1,2,5,3,-1},{9,-1,4,5,-1,-1},{9,-1,4,5,-1,-1},{-1,6,7,-1,-1,-1},{-1,-1,7,-1,-1,-1},{9,-1,7,-1,-1,-1},{-1,-1,4,-1,-1,-1},{9,-1,-1,-1,-1,-1}};
+    int start = 0;
+    int end[5] = {2,3,4,7,9};
+	```
