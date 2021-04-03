@@ -182,3 +182,79 @@ MainCode:
 3. 当前访问位置(i,j), 结果下标k
 4. 当向右访问时，当j<=right时一直循环将值放入结果；出循环时，将访问位置改变指向下一个位置(i++,j--)，同时将up边界改变为up++；同理向其他方向也是这样操作。
 5. 模拟一下循环条件可以有两种：k < 矩阵元素数目 或者 up <= down && left <= right.
+### 剑指 Offer 31. 栈的压入、弹出序列 ###
+1. 思考：当poped第一个元素为4，那么此时栈中必须是1234，不然第一个元素必不为4；
+2. 算法：
+	- 对于poped中每一个元素
+		1. 如果栈顶元素与它不同，则一直将pushed元素入栈，直到pushed无元素或找到相同元素。
+		2. 此时判断栈顶元素与它是否相同
+			1. 不同则return false;
+			2. 相同则弹出栈
+3. Code：
+	```
+	bool validateStackSequences(vector<int>& pushed, vector<int>& popped) {
+        int n = pushed.size();
+        stack<int> st;
+        int idx = 0;
+        for(int p : popped){
+            while((st.empty() || st.top() != p) && idx < n) st.push(pushed[idx++]);
+            if(idx == n && st.top() != p) return false;
+            st.pop();
+        }
+        return true;
+    }
+	```
+### 剑指 Offer 32 - I II III. 从上到下打印二叉树 ###
+- 层序遍历
+### 剑指 Offer 33. 二叉搜索树的后序遍历序列 ###
+- 递归的比较左子树和右子树，左子树都比根节点小，右子树都比根节点大
+### 剑指 Offer 35. 复杂链表的复制 ###
+- 深拷贝，用map保存<原始的，复制的>；函数返回节点的复制节点；
+- 其他遍历也行
+### 剑指 Offer 36. 二叉搜索树与双向链表 ###
+- 中序遍历，将节点保存在数组中；然后遍历数组构造即可。
+	```C++
+	vector<Node*> arr;
+	void inorder(Node* root){
+	    if(!root) return;
+	    inorder(root->left);
+	    arr.push_back(root);
+	    inorder(root->right);
+	}
+	Node* treeToDoublyList(Node* root) {
+	    if(!root) return nullptr;
+	    inorder(root);
+	    int n = arr.size();
+	    Node *head = arr[0], *rear = arr[n - 1];
+	    Node *p, *q;
+	    for(int i = 1; i < n; i++){
+	        p = arr[i - 1], q = arr[i];
+	        p->right = q;
+	        q->left = p;
+	    }
+	    head->left = rear;
+	    rear->right = head;
+	    return head;
+	}
+	```
+- 中序遍历，两个全局变量，用节点pre指向当前节点的前驱节点，head节点指向头节点，初始都为空；
+	```
+	Node *pre = nullptr, *head = nullptr;
+    void inorder(Node *root){
+        if(!root) return;
+        inorder(root->left);
+        if(pre) pre->right = root;
+        else head = root;
+        root->left = pre;
+        pre = root;
+        inorder(root->right);
+    }
+    Node* treeToDoublyList(Node* root) {
+        if(!root) return nullptr;
+        dfs(root);
+        head->left = pre;
+        pre->right = head;
+        return head;
+    }
+	```
+###  ###
