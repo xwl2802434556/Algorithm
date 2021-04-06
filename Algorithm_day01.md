@@ -257,4 +257,197 @@ MainCode:
         return head;
     }
 	```
+### 剑指 Offer 37. 序列化二叉树 ###
+- 本题不能用先序加中序构造二叉树，因为可能有值相同的节点。
+- 使用先序序列化二叉树，然后使用先序反序列化
+- Code1:
+	```C++
+	// Encodes a tree to a single string.
+    string serialize(TreeNode* root) {
+        string s;
+        ser(root, s);
+        return s;
+    }
+    // Decodes your encoded data to tree.
+    TreeNode* deserialize(string data) {
+        vector<string> nums = split(data);
+        TreeNode* r = nullptr;
+        build(nums, r);
+        return r;
+    }
+    //ser
+    void ser(TreeNode* t, string &s){
+        if(!t){
+            s.append("X,");
+            return;
+        }
+        s.append(to_string(t->val));
+        s.push_back(',');
+        ser(t->left, s);
+        ser(t->right, s);
+    }
+    //build
+    int idx = 0;
+    void build(vector<string> &nums, TreeNode* &t){
+        if(idx == nums.size()) return;
+        if(nums[idx] == "X"){
+            t = nullptr;
+            idx++;
+            return;
+        }
+        t = new TreeNode(stoi(nums[idx]));
+        idx++;
+        build(nums, t->left);
+        build(nums, t->right);
+    }
+    //helper
+    vector<string> split(string &s){
+        int n = s.size();
+        vector<string> ret;
+        int i = 0, j = 0;
+        while(i < n){
+            j = i;
+            while(i < n && s[i] != ',') i++;
+            ret.push_back(s.substr(j, i - j));
+            i++;
+        }
+        return ret;
+    }
+	```
+- 层序遍历，反序列化时，将根节点入队列。
+- Code2:
+	```C++
+	// Encodes a tree to a single string.
+    string serialize(TreeNode* root) {
+        if(!root) return ",";
+        string ans;
+        queue<TreeNode*> q;
+        q.push(root);
+        while(!q.empty()){
+            TreeNode* x = q.front(); q.pop();
+            if(!x){
+                ans.append("X,");
+                continue;
+            }
+            ans.append(to_string(x->val));
+            ans.push_back(',');
+            q.push(x->left);
+            q.push(x->right);
+        }
+        return ans;
+    }
+    // Decodes your encoded data to tree.
+    TreeNode* deserialize(string data) {
+        if(data == ",") return nullptr;
+        vector<string> nums = split(data);
+        TreeNode* ans = new TreeNode(stoi(nums[0]));
+        int i = 1, n = nums.size();
+        queue<TreeNode*> q;
+        q.push(ans);
+        while(i < n){
+            TreeNode* t = q.front(); q.pop();
+            if(nums[i] == "X"){
+                t->left = nullptr;
+            }else{
+                TreeNode* left = new TreeNode(stoi(nums[i]));
+                t->left = left;
+                q.push(left);
+            }
+            i++;
+            if(nums[i] == "X"){
+                t->right = nullptr;
+            }else{
+                TreeNode* right = new TreeNode(stoi(nums[i]));
+                t->right = right;
+                q.push(right);
+            }
+            i++;
+        }
+        return ans;
+    }
+    //helper
+    vector<string> split(string &s){
+        int n = s.size();
+        vector<string> ret;
+        int i = 0, j = 0;
+        while(i < n){
+            j = i;
+            while(i < n && s[i] != ',') i++;
+            ret.push_back(s.substr(j, i - j));
+            i++;
+        }
+        return ret;
+    }
+	```
+### 剑指 Offer 38. 字符串的排列 ###
+- 全排列，用回溯，看看weiwei哥就够了
+- [https://leetcode-cn.com/problems/permutations/solution/hui-su-suan-fa-python-dai-ma-java-dai-ma-by-liweiw/](https://leetcode-cn.com/problems/permutations/solution/hui-su-suan-fa-python-dai-ma-java-dai-ma-by-liweiw/)
+### 剑指 Offer 39. 数组中出现次数超过一半的数字 ###
+```
+原理：一对不同的元素同时消去，那么最后剩下的相同元素就是结果
+    cur表示可能的结果，cnt表示cur出现次数
+    初始时cur=nums[0],cnt=1;
+    从数组第二个元素开始遍历
+        如果当前元素等于cur，那么cur的出现次数cnt++,继续下一个元素
+        否则，当cur--
+            如果cur等于0，那么说明当前元素和cur可能不是结果，将cur设置为下一个元素
+            否则，继续下一个元素
+```
 ###  ###
+- 根据快速排序中的划分算法
+- Code1:
+	```cpp
+    vector<int> getLeastNumbers(vector<int>& arr, int k) {
+        int n = arr.size();
+        find(arr, 0, n - 1, k);
+        vector<int> ans;
+        for(int i = 0; i < k; i++){
+            ans.push_back(arr[i]);
+        }
+        return ans;
+    }
+    void find(vector<int>& arr, int low, int high, int k){
+        if(low > high) return;
+        int t = partion(arr, low, high);
+        if(t - low + 1 == k) return;
+        else if(t - low + 1 > k) find(arr, low, t - 1, k);
+        else find(arr, t + 1, high, k - (t - low + 1));
+    }
+    int partion(vector<int>& arr, int low, int high){
+        int x = arr[low];
+        while(low < high){
+            while(low < high && arr[high] >= x) high--;
+            arr[low] = arr[high];
+            while(low < high && arr[low] <= x) low++;
+            arr[high] = arr[low];
+        }
+        arr[low] = x;
+        return low;
+    }
+	```
+- 根据堆
+- Code2:
+	```cpp
+	vector<int> getLeastNumbers(vector<int>& arr, int k) {
+        if(k == 0) return {};
+        priority_queue<int> heap(arr.begin(), arr.begin() + k);
+        int n = arr.size();
+        for(int i = k; i < n; i++){
+            if(heap.top() <= arr[i]) continue;
+            heap.pop();
+            heap.push(arr[i]);
+        }
+        vector<int> ans;
+        while(!heap.empty()){
+            ans.push_back(heap.top());
+            heap.pop();
+        }
+        return ans;
+    }
+	```
+- 两者比较
+	||基于partion解法|基于堆解法|
+	|----|----|-----|
+	|时间复杂度|O(n)|O(nlogk)|
+	|是否修改数组|是|否|
+	|是否使用海量数据|否|是|
