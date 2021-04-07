@@ -451,3 +451,89 @@ MainCode:
 	|时间复杂度|O(n)|O(nlogk)|
 	|是否修改数组|是|否|
 	|是否使用海量数据|否|是|
+### 33. 搜索旋转排序数组 ###
+- Code:
+```cpp
+int search(vector<int>& nums, int target) {
+    int n = (int)nums.size();
+    int l = 0, r = n - 1;
+    while(l <= r){
+        int mid = l + (r - l) / 2;
+        if(nums[mid] == target) return mid;
+        if(nums[l] <= nums[mid]){   //左边有序
+            if(nums[l] <= target && target < nums[mid]){
+                r = mid - 1;
+            }else l = mid + 1;
+        }else{                      //右边有序
+            if(nums[mid] < target && target <= nums[r]) l = mid + 1;
+            else r = mid - 1;
+        }
+    }
+    return -1;
+}
+```
+### 81. 搜索旋转排序数组 II ###
+- Code:
+```cpp
+bool search(vector<int>& nums, int target) {
+    int n = nums.size();
+    int l = 0, r = n - 1;
+    while(l <= r){
+        int mid = l + ((r - l) >> 1);
+        if(nums[mid] == target) return true;
+        if(nums[mid] < nums[r]){
+            if(nums[mid] < target && target <= nums[r]) l = mid + 1;
+            else r = mid - 1;
+        }else if(nums[mid] > nums[r]){
+            if(nums[l] <= target && target < nums[mid]) r = mid - 1;
+            else l = mid + 1;
+        }else r--;
+    }
+    return false;
+}
+```
+### 剑指 Offer 41. 数据流中的中位数 ###
+- 用两个堆来保存数据，最大堆保存较小的一半数据，最小堆保存较大的一半数据。变量c1表示最大堆的元素个数，c2表示最小堆的元素个数。
+- 如果当前加入元素小于最大堆堆顶元素，说明该元素属于较小的一半数据。那么将其加入最大堆，同时c1++，这时c1如果大于c2+1，那么需要调整，将最大堆堆顶元素弹给最小堆，同时修改c1,c2。
+- 否则，同样....
+- Code:
+```cpp
+class MedianFinder {
+    priority_queue<int> maxh;
+    priority_queue<int,vector<int>, greater<int>> minh;
+    int c1 = 0, c2 = 0;
+public:
+    MedianFinder() {
+    }
+    void addNum(int num) {
+        if(c1 == 0){
+            maxh.push(num);
+            c1++;
+            return;
+        }
+        if(num < maxh.top()){
+            maxh.push(num); c1++;
+            if(c1 > c2 + 1){
+                minh.push(maxh.top());
+                maxh.pop();
+                c1--; c2++;
+            }
+        }else{
+            minh.push(num); c2++;
+            if(c2 > c1 + 1){
+                maxh.push(minh.top());
+                minh.pop();
+                c2--; c1++;
+            }
+        }
+    }
+    double findMedian() {
+        double ans = 0;
+        if(c1 == c2) ans = (double)(maxh.top() + minh.top()) / 2;
+        else if(c1 < c2) ans = minh.top();
+        else ans = maxh.top();
+        return ans;
+    }
+};
+```
+###  ###
