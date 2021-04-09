@@ -536,4 +536,107 @@ public:
     }
 };
 ```
+### 剑指 Offer 42. 连续子数组的最大和 ###
+- 动态规划
+### 剑指 Offer 43. 1～n 整数中 1 出现的次数 ###
+- 找规律，计算个、十、百、千..位上的1出现次数，相加
+- 个位1：每十个数中有一个
+- 十位1：每百位数中有十个
+- 百位1：每千位数中有百个
+- 举例：
+	- 1234
+	- 求个位1：
+		- 1234 / 10 + (1234 % 10 > 0 ? 1 : 0)
+	- 求十位1：
+		- 1234 / 100 * 10 + (1234 % 100 - 99 >= 100 ?)
+		- 这里括号里的值a根据c=1234%100而定(10-19)
+			- 如果c<10，那么a=0;
+			- 如果c>20，那么a=10;
+			- 否则a=c-9;
+		- 所以括号里为(1234%100<10?0:(1234%100>20?10:1234%100-9))
+- Code:
+```cpp
+int countDigitOne(int n) {
+        long ans = 0, bit = 1, sub = 0;
+        while(bit <= n){
+            long mod = bit * 10;
+            ans = ans + n / mod * bit + (n % mod - sub <= 0 ? 0 : (n % mod - sub >= bit ? bit : n % mod - sub));
+            bit = mod;
+            sub = sub * 10 + 9;
+        }
+        return ans;
+    }
+```
+### 剑指 Offer 44. 数字序列中某一位的数字 ###
+- 找规律
+- 一位数总数有10个
+- 两位数总数有180个---2 * 10 * 9
+- 三位数总数有2700个--3 * 100 * 9.....
+- 算法：从一位数开始，计算一位数总数all，与n比较大小，大于则n-=all,再比较两位数..，直到找到一个n<all的，计bit为位数，则计算查找的是bit位数中的第几个即可。
+- Code:
+```cpp
+int findNthDigit(int n) {
+    if(n < 10) return n;
+    int bit = 2, base = 10;
+    long mul = 90;
+    long all = bit * mul;
+    n -= 10;
+    while(n >= all){
+        n -= all;
+        bit++;
+        mul *= 10;
+        all = bit * mul;
+        base *= 10;
+    }
+    int a = n / bit + base, b = n % bit;
+    while(bit - b > 1){
+        a /= 10;
+        b++;
+    }
+    return a % 10;
+}
+```
+### 剑指 Offer 45. 把数组排成最小的数 ###
+- 数字拼接可能会产生大数，int无法表示，所以需要将数字转换为字符串。
+- Code:
+```cpp
+static bool cmp(string &a, string &b){
+    return a + b < b + a;
+}
+string minNumber(vector<int>& nums) {
+    vector<string> arr;
+    for(int num : nums) arr.push_back(to_string(num));
+    sort(arr.begin(), arr.end(), cmp);
+    string ans;
+    for(string num : arr) ans.append(num);
+    return ans;
+}
+```
+### 剑指 Offer 46. 把数字翻译成字符串 ###
+- 根据最后一位数，最后两位数，进行递归
+- 如果从前往后，会有重复子问题，比如12258,会计算258两次。
+- Code:
+```cpp
+int translateNum(int num) {
+    if(num >= 0 && num <= 9) return 1;
+    if(num >= 10 && num <= 25) return 2;
+    return translateNum(num / 10) + translateNum(num / 100) * (num % 100 >= 10 && num % 100 <= 25);
+}
+```
+### 剑指 Offer 47. 礼物的最大价值 ###
+- 动态规划，从右下角向左上角遍历，dp[i][j] = max(right, down) + grid[i][j];
+- Code:
+```cpp
+int maxValue(vector<vector<int>>& grid) {
+    int m = grid.size(), n = grid[0].size();
+    for(int i = m - 1; i >= 0; i--){
+        for(int j = n - 1; j >= 0; j--){
+            int down = i + 1 < m ? grid[i + 1][j] : 0;
+            int right = j + 1 < n ? grid[i][j + 1] : 0;
+            grid[i][j] = max(down, right) + grid[i][j];
+        }
+    }
+    return grid[0][0];
+}
+```
 ###  ###
