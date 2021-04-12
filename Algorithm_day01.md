@@ -182,6 +182,8 @@ MainCode:
 3. 当前访问位置(i,j), 结果下标k
 4. 当向右访问时，当j<=right时一直循环将值放入结果；出循环时，将访问位置改变指向下一个位置(i++,j--)，同时将up边界改变为up++；同理向其他方向也是这样操作。
 5. 模拟一下循环条件可以有两种：k < 矩阵元素数目 或者 up <= down && left <= right.
+### 剑指 Offer 30. 包含min函数的栈 ###
+- 双栈，每次push时，辅助栈都push最小值，这样辅助栈栈顶一直都对应着栈中的最小值。
 ### 剑指 Offer 31. 栈的压入、弹出序列 ###
 1. 思考：当poped第一个元素为4，那么此时栈中必须是1234，不然第一个元素必不为4；
 2. 算法：
@@ -208,6 +210,33 @@ MainCode:
 - 层序遍历
 ### 剑指 Offer 33. 二叉搜索树的后序遍历序列 ###
 - 递归的比较左子树和右子树，左子树都比根节点小，右子树都比根节点大
+### 剑指 Offer 34. 二叉树中和为某一值的路径 ###
+- 深度优先搜索
+- Code：
+```cpp
+class Solution {
+    vector<vector<int>> ans;
+    vector<int> tmp;
+    int target;
+public:
+    vector<vector<int>> pathSum(TreeNode* root, int target) {
+        this->target = target;
+        helper(root, 0);
+        return ans;
+    }
+    void helper(TreeNode* &root, int sum){
+        if(!root) return;
+        int val = root->val;
+        tmp.push_back(val);
+        if(sum + val == target && !root->left && !root->right){
+            ans.push_back(tmp);
+        }
+        helper(root->left, sum + val);
+        helper(root->right, sum + val);
+        tmp.pop_back();
+    }
+};
+```
 ### 剑指 Offer 35. 复杂链表的复制 ###
 - 深拷贝，用map保存<原始的，复制的>；函数返回节点的复制节点；
 - 其他遍历也行
@@ -637,6 +666,26 @@ int maxValue(vector<vector<int>>& grid) {
         }
     }
     return grid[0][0];
+}
+```
+### 剑指 Offer 48. 最长不含重复字符的子字符串 ###
+- 双指针，哈希表
+- 只有当字符出现过，并且比左指针大时，才修改左指针。
+- Code：
+```cpp
+int lengthOfLongestSubstring(string s) {
+    int n = s.size();
+    unordered_map<char,int> hash;
+    int ans = 0, l = 0, r = 1;
+    for(int i = 0; i < n; i++){
+        char c = s[i];
+        if(hash.find(c) != hash.end() && hash[c] >= l){
+            l = hash[c] + 1;
+        }
+        ans = max(ans, i - l + 1);
+        hash[c] = i;
+    }
+    return ans;
 }
 ```
 ###  ###
