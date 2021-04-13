@@ -688,4 +688,83 @@ int lengthOfLongestSubstring(string s) {
     return ans;
 }
 ```
-###  ###
+### 剑指 Offer 49. 丑数 ###
+- 丑数应该是另一个丑数的2,3,5倍，可以创建一个数组，保存排好序的丑数，每个丑数都由前面的丑数得到。
+- 将每个丑数分别乘上2,3,5，将其与刚好大于已经计算出来的最大丑数比较，找到刚好大于最大丑数的最小丑数加入数组中。
+- 可以想象存在一个丑数T2，排在它前面的丑数乘以2结果会小于已有的最大丑数，在它之后的丑数乘以2结果都会太大，只需记住T2位置即可，同样也存在T3,T5
+- Code:
+```cpp
+int nthUglyNumber(int n) {
+    vector<int> dp(n + 1);
+    dp[1] = 1;
+    int idx2 = 1, idx3 = 1, idx5 = 1;
+    int i = 2;
+    while(i <= n){
+        int ugly2 = dp[idx2] * 2, ugly3 = dp[idx3] * 3, ugly5 = dp[idx5] * 5;
+        int ugly = min(ugly2, min(ugly3, ugly5));
+        if(ugly == ugly2) idx2++;
+        if(ugly == ugly3) idx3++;
+        if(ugly == ugly5) idx5++;
+        dp[i++] = ugly;
+    }
+    return dp[n];
+}
+```
+### 剑指 Offer 50. 第一个只出现一次的字符 ###
+- 第一次遍历，统计每个字符出现的次数
+- 第二次遍历到第一个只出现一次的字符时结束遍历，返回
+- Code:
+```cpp
+char firstUniqChar(string s) {
+    int n = s.size();
+    vector<int> hash(256);
+    for(char c : s) hash[c]++;
+    char ans = ' ';
+    for(char c : s){
+        if(hash[c] == 1){
+            ans = c;
+            break;
+        }
+    }
+    return ans;
+}
+```
+### 剑指 Offer 51. 数组中的逆序对 ###
+- 使用归并排序计算逆序对
+- 两个已排序数组合并为一个排序数组时
+- 左边数组的当前值如果大于右边数组当前值，那么说明左边数组中所有值均大于右边数组当前值，那么结果加上左边数组元素个数
+- Code:
+```cpp
+class Solution {
+    int ans = 0;
+    vector<int> tmp;
+public:
+    int reversePairs(vector<int>& nums) {
+        int n = nums.size();
+        tmp.resize(n);
+        mergeSort(nums, 0, n - 1);
+        return ans;
+    }
+    void merge(vector<int>& nums, int left, int mid, int right){
+        //vector<int> tmp(right - left + 1);
+        int k = 0, i = left, j = mid + 1;
+        while(i <= mid && j <= right){
+            if(nums[i] <= nums[j]) tmp[k++] = nums[i++];
+            else{
+                ans += mid - i + 1;
+                tmp[k++] = nums[j++];
+            }
+        }
+        while(i <= mid) tmp[k++] = nums[i++];
+        while(j <= right) tmp[k++] = nums[j++];
+        for(int i = 0; i < k; i++) nums[i + left] = tmp[i];
+    }
+    void mergeSort(vector<int>& nums, int l, int r){
+        if(l >= r) return;
+        int mid = (l + r) >> 1;
+        mergeSort(nums, l, mid);
+        mergeSort(nums, mid + 1, r);
+        merge(nums, l, mid, r);
+    }
+};
+```
