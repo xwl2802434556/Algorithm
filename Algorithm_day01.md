@@ -771,3 +771,177 @@ public:
 ### 剑指 Offer 52. 两个链表的第一个公共节点 ###
 - 解法一：先遍历一个链表，用哈希表保存每个节点；再遍历另一个链表，如果节点在哈希表中，直接返回，否则返回nullptr
 - 解法二：计算两个链表长度，将较长的链表后移到短链表同样长度，然后两者同时后移，返回第一个相同的节点。
+### 剑指 Offer 53 - I. 在排序数组中查找数字 I ###
+- Solution：[https://leetcode-cn.com/problems/zai-pai-xu-shu-zu-zhong-cha-zhao-shu-zi-lcof/solution/mian-shi-ti-53-i-zai-pai-xu-shu-zu-zhong-cha-zha-5/](https://leetcode-cn.com/problems/zai-pai-xu-shu-zu-zhong-cha-zhao-shu-zi-lcof/solution/mian-shi-ti-53-i-zai-pai-xu-shu-zu-zhong-cha-zha-5/)
+- 二分查找，找到待插入位置
+- Code:
+```cpp
+int search(vector<int>& nums, int target) {
+    /**
+        两次二分查找，第一次找到大于target的第一个数，第二次找到小于target的最后一个数
+    */
+    if(nums.size() == 0) return 0;
+    return helper(nums, target) - helper(nums, target - 1);
+}
+//查找target待插入位置，如果有相同元素，则插到最后一个后面，返回待插入位置
+int helper(vector<int>& nums, int target){
+    int n = nums.size();
+    int left = 0, right = n - 1, mid;
+    while(left < right){
+        mid = (left + right) >> 1;
+        if(nums[mid] <= target) left = mid + 1;//如果中间值小于等于target，那么插入位置在[mid+1,right]中
+        else right = mid;
+    }
+    return nums[right] <= target ? right + 1 : right;   //待插入位置，如果右边界小于等于target，那么插入位置就在后面
+}
+```
+### 剑指 Offer 53 - II. 0～n-1中缺失的数字 ###
+- 二分查找，数组中每个元素本应该和下标相同，缺少的数字对应的下标及其之后都会比下标大1.
+- 如果中间数nums[mid]等于下标mid，那么left = mid + 1，在右边寻找，否则right = mid,因为mid可能是结果
+- Code:
+```cpp
+int missingNumber(vector<int>& nums) {
+    int n = nums.size();
+    //if(n == 1) return 1 - nums[0];
+    int left = 0, right = n - 1, mid = 0;
+    while(left < right){
+        mid = left + ((right - left) >> 1);
+        if(nums[mid] == mid) left = mid + 1;
+        else right = mid;
+    }
+    return right == nums[right] ? right + 1 : right;	//这里也可以不这样写，在开头判断也行
+    // int sum1 = n * (n + 1) / 2, sum2 = 0;
+    // for(int i = 0; i < n; i++) sum2 += nums[i];
+    // return sum1 - sum2;
+}
+```
+### 剑指 Offer 54. 二叉搜索树的第k大节点 ###
+- 中序遍历(右根左)，用一个全局变量rank记录当前访问的第几大元素。
+- Code：
+```cpp
+class Solution {
+    int ans = 0, rank = 0, k;
+public:
+    void helper(TreeNode* root){
+        if(!root) return;
+        helper(root->right);
+        rank++;
+        if(rank == k){
+            ans = root->val;
+            return;
+        }
+        helper(root->left);
+    }
+    int kthLargest(TreeNode* root, int k) {
+		this->k = k;
+        helper(root);
+        return ans;
+    }
+};
+```
+### 剑指 Offer 55 - I. 二叉树的深度 ###
+- 如果根节点为空，返回0，否则返回左右子树的深度中的最大值 + 1；
+- Code:
+```cpp
+int maxDepth(TreeNode* root) {
+    if(!root) return 0;
+	int l = maxDepth(root->left);
+	int r = maxDepth(root->right);
+    return max(l, r) + 1;
+}
+```
+### 剑指 Offer 55 - II. 平衡二叉树 ###
+- 方法1：用一个全局变量flag记录二叉树是否不平衡
+- 方法2：也可以用引用参数height记录当前节点高度。
+- Code：
+```cpp
+class Solution {
+public:
+    bool isBalanced(TreeNode* root) {
+        flag = true;
+        maxDepth(root);
+        return flag;
+    }
+    bool flag;
+    int maxDepth(TreeNode* root){
+        if(!root) return 0;
+        int l = maxDepth(root->left);
+        int r = maxDepth(root->right);
+        if(abs(l - r) > 1) flag = false;
+        return max(l, r) + 1;
+    }
+};
+```
+### 剑指 Offer 56 - I. 数组中数字出现的次数 ###
+- 当数组中只有一个数字出现一次，其他数字都出现两次时，可以使用异或操作找到该数
+- 如果有两个数字出现一次，那么可以将整个数组分为两部分，每一部分只包含一个只出现一次的数字
+- 如何分为两部分？可以将所有元素的异或结果ret的二进制表示中，找到一个不为0的位置，根据此位置划分
+- Code：
+```cpp
+vector<int> singleNumbers(vector<int>& nums) {
+    int ret = 0;
+    for(int num : nums) ret ^= num;
+    int patten = 1;
+    while(!(patten & ret)) patten <<= 1;
+    int a = 0, b = 0;
+    for(int num : nums){
+        if(num & patten) a ^= num;
+        else b ^= num;
+    }
+    return {a, b};
+}
+```
+### 剑指 Offer 56 - II. 数组中数字出现的次数 II ###
+- 出现三次，可以统计每一位出现的次数在长度为32的数组中
+- 将长度为32的数组每一位对3取余构成结果
+- Code:
+```cpp
+int singleNumber(vector<int>& nums) {
+    vector<int> bits(32);
+    for(int num : nums){
+        for(int i = 0; i < 32; i++){
+            bits[i] += (num & 1);
+            num >>= 1;
+        }
+    }
+    int ans = 0;
+    for(int i = 31; i >= 0; i--){
+        ans <<= 1;
+        ans |= (bits[i] % 3);
+    }
+    return ans;
+}
+```
+### 剑指 Offer 57. 和为s的两个数字 ###
+- 双指针
+### 剑指 Offer 57 - II. 和为s的连续正数序列 ###
+- 双指针，left初始指向1，right指向2
+- 如果和小于target，那么right后移
+- 如果和等于target，那么存入结果，同时right后移
+- 如果和大于target，那么left右移
+- 直到left<=target/2;
+- Code:
+```cpp
+vector<vector<int>> findContinuousSequence(int target) {
+    int mid = target / 2;
+    int left = 1, right = 2, sum = 3;
+    vector<vector<int>> ans;
+    while(left <= mid){
+        if(sum == target){
+            vector<int> tmp;
+            for(int i = left; i <= right; i++) tmp.push_back(i);
+            ans.push_back(tmp);
+            right++;
+            sum += right;
+        }else if(sum < target){
+            right++;
+            sum += right;
+        }else{
+            sum -= left;
+            left++;
+        }
+    }
+    return ans;
+}
+```
+###  ###
