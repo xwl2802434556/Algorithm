@@ -1,4 +1,4 @@
-### 剑指 Offer 14- I. 剪绳子 && 343. 整数拆分 ###
+ans### 剑指 Offer 14- I. 剪绳子 && 343. 整数拆分 ###
 - 解法：动态规划
 - 状态：dp[n]表示将长度为n的绳子拆分后得到的最大乘积
 - 转移方程：dp[n] = max(dp[i] * dp[n - i])
@@ -944,4 +944,8 @@ vector<vector<int>> findContinuousSequence(int target) {
     return ans;
 }
 ```
-###  ###
+### 剑指 Offer 58 - I. 翻转单词顺序 ###
+- 用后向前遍历，用一个变量标记单词末尾。
+### 剑指 Offer 58 - II. 左旋转字符串 ###
+- 翻转3次
+### 剑指 Offer 59 - I. 滑动窗口的最大值 ###
