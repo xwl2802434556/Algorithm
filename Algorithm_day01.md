@@ -949,3 +949,61 @@ vector<vector<int>> findContinuousSequence(int target) {
 ### 剑指 Offer 58 - II. 左旋转字符串 ###
 - 翻转3次
 ### 剑指 Offer 59 - I. 滑动窗口的最大值 ###
+- 如何在k个数中用O(1)时间找到最大值？单调栈
+- 所以可以使用双端队列，队首始终保存当前窗口最大值。
+- 每当遇到一个数cur，说明窗口后移了一位，判断最大值是否被移出
+	- 如果被移除，那么队列将队首移出
+- 将cur与队尾元素比较，如果大于队尾元素，则一直从队尾移出元素，直到队尾元素大于cur，然后将cur插入队尾。
+- 这里的双端队列，相当于可以移出栈底元素的单调栈。
+- Code：
+```cpp
+vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+    int n = nums.size();
+    if(n == 0) return {};
+    vector<int> ans(n - k + 1);
+    deque<int> q;
+    for(int i = 0; i < k; i++){
+        while(!q.empty() && nums[i] >= nums[q.back()]) q.pop_back();
+        q.push_back(i);
+    }
+    ans[0] = nums[q.front()];
+    for(int i = k, j = 1; i < n; i++, j++){
+        //将队首不在窗口节点去除
+        if(q.front() <= i - k) q.pop_front();
+
+        while(!q.empty() && nums[i] >= nums[q.back()]) q.pop_back();
+        q.push_back(i);
+        ans[j] = nums[q.front()];
+    }
+    return ans;
+}
+```
+### 剑指 Offer 59 - II. 队列的最大值 ###
+- 当一个元素进入队列时，它前面所有比它小的元素就不会再对答案产生影响。
+- 所以每次进入队列时，将辅助队列队尾小于等于它的都移出。
+- Code:
+```cpp
+class MaxQueue {
+    queue<int> q;
+    deque<int> d;
+public:
+    MaxQueue() {}
+    int max_value() {
+        if(d.empty()) return -1;
+        return d.front();
+    }
+    void push_back(int value) {
+        while(!d.empty() && d.back() <= value) d.pop_back();
+        d.push_back(value);
+        q.push(value);
+    }
+    int pop_front() {
+        if(q.empty()) return -1;
+        if(q.front() == d.front()) d.pop_front();
+        int ans = q.front();
+        q.pop();
+        return ans;
+    }
+};
+```
+###  ###
