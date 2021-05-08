@@ -1006,4 +1006,301 @@ public:
     }
 };
 ```
-###  ###
+### 剑指 Offer 60. n个骰子的点数 ###
+- n个骰子的点数和范围是[n,6n]，统计每个点数出现次数，然后除以6<sup>n</sup>，就是需要的结果
+- Code1: int getCount(int n, int k);n个骰子个数和为k的出现次数
+```cpp
+map<pair<int,int>, int> hash;
+vector<double> dicesProbability(int n) {
+    // double n6 = pow(6, n);
+    // int start = n, end = 6 * n;
+    // vector<double> ans(end - start + 1);
+    // for(int i = start; i <= end; i++){
+    //     ans[i - start] = getConut(n, i) / n6;
+    // }
+    // return ans;
+}
+int getConut(int n, int k){
+    if(n > k || n * 6 < k) return 0;
+    if(n == k) return 1;
+    if(n == 1) return 1;
+    if(hash.count({n, k}) > 0) return hash[{n, k}];
+    int t = 0;
+    for(int i = 1; i <= 6; i++){
+        t += getConut(n - 1, k - i);
+    }
+    hash[{n, k}] = t;
+    return t;
+}
+```
+- Code2:根据递归可以直到递推公式，可以用动态规划求解
+```cpp
+vector<double> helper(int n) {
+    double n6 = pow(6, n);
+    int start = n, end = 6 * n;
+    vector<vector<int>> dp(n + 1, vector<int>(1 + n * 6));
+    for(int i = 1; i <= 6; i++) dp[1][i] = 1;	//边界
+    for(int j = 2; j <= n; j++){				//第2~n个骰子
+        int end1 = j * 6, end2 = (j - 1) * 6;
+        for(int k = j; k <= end1; k++){			//骰子的点数和[n,6n]
+			//利用递推公式计算
+            for(int sub = 1; sub <= 6; sub++){	
+				//判别条件，不可能情况则为0
+                int t = (k - sub < j - 1 || k - sub > end2) ? 0 : dp[j - 1][k - sub];
+                dp[j][k] += t;
+            }
+        }
+    }
+    vector<double> ans(end - start + 1);
+    for(int i = start; i <= end; i++){
+        ans[i - start] = dp[n][i] / n6;
+    }
+    return ans;
+}
+```
+### 剑指 Offer 61. 扑克牌中的顺子 ###
+- 抽象建模，将扑克牌转换为数组。
+- Code：
+```cpp
+bool isStraight(vector<int>& nums) {
+    sort(nums.begin(), nums.end());
+    int cnt0 = 0;
+    for(; cnt0 < 5 && nums[cnt0] == 0; cnt0++);
+    if(cnt0 >= 4) return true;
+    int pre = nums[cnt0];
+    for(int i = cnt0 + 1; i < 5; i++){
+        if(nums[i] == pre) return false;
+        int need0 = nums[i] - pre - 1;
+        if(need0 <= cnt0){
+            cnt0 -= need0;
+            pre = nums[i];
+        }else return false;
+    }
+    return true;
+}
+```
+### 剑指 Offer 62. 圆圈中最后剩下的数字 ###
+- Code1: 用链表模拟圈，时间复杂度O(mn),空间复杂度O(n)
+```cpp
+class Solution {
+    struct node{
+        int val;
+        struct node* next;
+        node(int val) : val(val){}
+    };
+public:
+    int lastRemaining(int n, int m) {
+        node *head = new node(0);
+        node *rear = head;
+        for(int i = 1; i < n; i++){
+            node *t = new node(i);
+            rear->next = t;
+            rear = t;
+        }
+        rear->next = head;
+        node *p = head, *t;
+        while(p->next != p){
+            for(int i = 0; i < m - 1; i++) p = p->next;
+            t = p->next;
+            p->val = t->val;
+            p->next = t->next;
+            delete t;
+        }
+        int val = p->val;
+        delete p;
+        return val;
+    }
+};
+```
+- Code2：递归，记int f(n,m);表示从n个数围成的圈中删除第m个数，...，返回最后剩下的一个数的下标y。则f(n-1,m)也等于y，因为f(n-1,m)是从下标m开始计数的，而y是从0开始计数。可以得到公式f(n,m) = (f(n-1,m)+m)%n
+```cpp
+int lastRemaining(int n, int m) {
+    return f(n, m);
+}
+int f(int n, int m){
+    if(n == 1) return 0;
+    return (f(n - 1, m) + m) % n;
+}
+```
+- Code3：逆推，删除到一个数时，该数下标为0；那么往前找该数所在的下标。不太理解
+```cpp
+int lastRemaining(int n, int m) {
+    int ans = 0;
+    for(int i = 2; i <= n; i++){
+        ans = (ans + m) % i;
+    }
+    return ans;
+}
+```
+### 剑指 Offer 63. 股票的最大利润 ###
+- 记录历史最低点，从前向后遍历所有股票，每次都减去历史最低点，与结果比较。
+- Code：
+```cpp
+int maxProfit(vector<int>& prices) {
+    int n = prices.size();
+    if(n < 2) return 0;
+    int buy = prices[0], ans = 0;
+    for(int i = 1; i < n; i++){
+        buy = min(buy, prices[i]);
+        ans = max(ans, prices[i] - buy);
+    }
+    return ans;
+}
+```
+### 剑指 Offer 64. 求1+2+…+n ###
+- Code1:
+```cpp
+int sumNums(int n) {
+    char a[n][n+1];
+    return sizeof(a) >> 1;
+}
+```
+- Code2:
+```cpp
+int sumNums(int n) {
+    int ans = n;
+	n && (ans += sumNums(n - 1));
+    return ans;
+}
+```
+### 剑指 Offer 65. 不用加减乘除做加法 ###
+- Code
+```cpp
+int add(int a, int b) {
+    while(b){       //当进位不为0
+        int c = (unsigned int)(a & b) << 1;//进位
+        a ^= b;     //非进位和
+        b = c;
+    }
+    return a;
+}
+```
+### 剑指 Offer 66. 构建乘积数组 ###
+- Code
+```cpp
+vector<int> constructArr(vector<int>& a) {
+    int n = a.size();
+    vector<int> i_left_mul(a);
+    vector<int> i_right_mul(a);
+    for(int i = 1; i < n; i++) i_left_mul[i] = a[i] * i_left_mul[i - 1];
+    for(int i = n - 2; i >= 0; i--) i_right_mul[i] = a[i] * i_right_mul[i + 1];
+    vector<int> ans(n);
+    for(int i = 0; i < n; i++){
+        int left = i > 0 ? i_left_mul[i - 1] : 1;
+        int right = i < n - 1 ? i_right_mul[i + 1] : 1;
+        ans[i] = left * right;
+    }
+    return ans;
+}
+```
+### 剑指 Offer 67. 把字符串转换成整数 ###
+- Code:
+```cpp
+class Solution {
+public:
+    enum STATUS{valid = 0, invalid};
+    int g_status = valid;
+    int strToInt(string str) {
+        int n = str.size();
+        if(n == 0){
+            g_status = invalid;
+            return 0;
+        }
+        int i = 0;
+        while(i < n && str[i] == ' ') i++;  //过滤空格
+        if(i == n){
+            g_status = invalid;
+            return 0;
+        }
+        bool sign = true;
+        if(str[i] == '+') i++;
+        else if(str[i] == '-'){
+            sign = false;
+            i++;
+        }else if(str[i] >= '0' && str[i] <= '9'){
+            int ans = getInt(str, i, n, sign);
+            g_status = valid;
+            return ans;
+        }else{
+            g_status = invalid;
+            return 0;
+        }
+        if(i == n){
+            g_status = invalid;
+            return 0;
+        }
+        if(str[i] >= '0' && str[i] <= '9'){
+            int ans = getInt(str, i, n, sign);
+            g_status = valid;
+            return ans;
+        }
+        g_status = invalid;
+        return 0;
+    }
+    int getInt(string &str, int i, int n, bool sign){
+        long long ans = 0;
+        while(i < n && str[i] >= '0' && str[i] <= '9'){
+            ans = ans * 10 + str[i] - '0';
+            i++;
+            if(sign && ans >= INT_MAX) return INT_MAX;
+            if(!sign && -ans <= INT_MIN) return INT_MIN;
+        }
+        return sign ? ans : -ans;
+    }
+};
+```
+### 剑指 Offer 68 - II. 二叉树的最近公共祖先 ###
+- Code: getPath先序遍历保存节点的所有祖先节点；得到两个节点的祖先路径，转化为比较两个链表的公共节点。
+```cpp
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        vector<TreeNode*> pathp, pathq, tmp;
+        getPath(root, p, tmp, pathp);
+        tmp.clear();
+        getPath(root, q, tmp, pathq);
+        int m = pathp.size(), n = pathq.size();
+        m = m > n ? n : m;
+        int i = 0;
+        for(; i < m; i++){
+            if(pathp[i] != pathq[i]) break;
+        }
+        return pathq[i - 1];
+    }
+    void getPath(TreeNode* root, TreeNode* p, vector<TreeNode*> &tmp, vector<TreeNode*> &path){
+        tmp.push_back(root);
+        if(root == p){
+            path = tmp;
+            return;
+        }
+        if(root->left){
+            getPath(root->left, p, tmp, path);
+            tmp.pop_back();
+        }
+        if(root->right){
+            getPath(root->right, p, tmp, path);
+            tmp.pop_back();
+        }
+    }
+};
+```
+- Code2：
+```cpp
+TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+    if(!root) return nullptr;
+    if(root == p || root == q) return root;		//返回节点的祖先节点
+    TreeNode* left = lowestCommonAncestor(root->left, p, q);
+    TreeNode* right = lowestCommonAncestor(root->right, p, q);
+    if(left && right) return root;				//左右都有，说明一边一个；
+    return left ? left : right;					//否则就在一边
+}
+```
